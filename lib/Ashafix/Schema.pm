@@ -19,7 +19,7 @@ use strict;
 use warnings;
 use DBIx::Simple;
 use Carp qw/ croak /;
-use Mojo::Loader;
+use Mojo::Loader qw(find_modules load_class);
 use Try::Tiny;
 
 my $DB;
@@ -41,10 +41,10 @@ sub new {
         $self->_setup_dbms_specifics($DB, $config{dsn});
 
         my $modules = [
-            grep { $_ ne 'Ashafix::Schema::Base' } @{Mojo::Loader->search('Ashafix::Schema')}
+            grep { $_ ne 'Ashafix::Schema::Base' } find_modules('Ashafix::Schema')
         ];
         foreach my $pm (@$modules) {
-            my $e = Mojo::Loader->load($pm);
+            my $e = load_class($pm);
             croak "Loading `$pm' failed: $e" if ref $e;
             my ($basename) = $pm =~ /.*::(.*)/;
             $self->{modules}{lc $basename} = $pm->new(\%config);

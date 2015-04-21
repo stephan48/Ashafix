@@ -18,7 +18,7 @@ package Ashafix::Model;
 use strict;
 use warnings;
 use Carp qw/ croak /;
-use Mojo::Loader;
+use Mojo::Loader qw/find_modules load_class/;
 use Try::Tiny;
 use Ashafix::Schema;
 use Mojo::Base -base;
@@ -31,8 +31,8 @@ sub new {
     my %args = @_;
     my $self = $class->SUPER::new(@_);
 
-    foreach my $pm (grep { $_ ne 'Ashafix::Model::Base' } @{Mojo::Loader->search('Ashafix::Model')}) {
-        my $e = Mojo::Loader->load($pm);
+    foreach my $pm (grep { $_ ne 'Ashafix::Model::Base' } find_modules('Ashafix::Model')) {
+        my $e = load_class($pm);
         croak "Loading `$pm' failed: $e" if ref $e;
         my ($basename) = $pm =~ /.*::(.*)/;
         $self->modules->{lc $basename} = $pm->new(%args);
