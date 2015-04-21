@@ -71,7 +71,7 @@ sub setup_plugins {
 
     # Setup signed sessions
     $self->plugin('Mojolicious::Plugin::FrozenSessions' => {});
-    $self->app->secret($config->{secret});
+    $self->secrets(delete $config->{secrets});
     #$self->sessions->cookie_domain('localhost');    # TODO configurable
     $self->sessions->cookie_name('ashafix');
 
