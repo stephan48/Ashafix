@@ -168,10 +168,15 @@ sub setup_hooks {
 sub setup_model {
     my $self = shift;
     my $config = $self->config('database');
+
+    my $dsn = "DBI:$config->{type}:database=$config->{name};";
+
+    $dsn .= "host=$config->{host}" if $config->{host};
+
     my $model = Ashafix::Model->new(
         app         => $self,
         root_schema => Ashafix::Schema->new(
-            dsn         => "DBI:$config->{type}:database=$config->{name};host=$config->{host}",
+            dsn         => $dsn,
             user        => $config->{user},
             password    => $config->{password},
             tabledefs   => $self->config('database_tables'),
