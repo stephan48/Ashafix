@@ -94,7 +94,8 @@ sub setup_plugins {
 sub setup_routing {
     my $self = shift;
     my $r = $self->routes;
-    $r->namespace('Ashafix::Controller'); # we want models separated
+
+    unshift @{$r->namespaces}, 'Ashafix::Controller';
 
     # Authentication conditions
     $r->add_condition(login => sub { $_[1]->auth_require_login });
