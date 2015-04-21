@@ -5,3 +5,6 @@ requires 'DBIx::Simple';
 requires 'URI::Escape';
 requires 'Crypt::PasswdMD5';
 requires 'FreezeThaw';
+requires 'Mojolicious::Plugin::I18N';
+requires 'DBD::mysql';
+requires 'DBD::Pg';
