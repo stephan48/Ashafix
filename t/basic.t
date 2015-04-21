@@ -17,7 +17,7 @@ setup($t);
 
 # Login
 $t->get_ok('/')->status_is(200)->content_like(qr/Mail admins login here to administer your domain/);
-$t->post_form_ok('/' => { @credentials })->status_is(302);
+$t->post_ok('/' => form => { @credentials })->status_is(302);
 # Main menu
 $t->get_ok('/main')->content_like(qr#List your aliases and mailboxes. You can edit / delete them from here.#);
 
@@ -29,7 +29,7 @@ $t->get_ok('/domain/list')->content_like(qr#<p><a href="/domain/create">New Doma
 # Domain: form
 $t->get_ok('/domain/create')->content_like(qr#<td colspan="3"><h3>Add a new domain</h3></td>#);
 # Domain: create
-$t->post_form_ok('/domain/create' => {
+$t->post_ok('/domain/create' => form => {
         domain          => 'invalid.com',
         description     => 'Test domain',
         aliases         => 123,
@@ -39,7 +39,7 @@ $t->post_form_ok('/domain/create' => {
 
 # Password: form
 $t->get_ok('/password')->content_like(qr#<h3>Change your login password.</h3>#);
-$t->post_form_ok('/password' => {
+$t->post_ok('/password' => form => {
         currentpw   => '12345678',
         newpw       => '1234567890',
         newpw2       => '1234567890',
@@ -50,27 +50,44 @@ exit 0;
 sub setup {
     my ($t) = @_;
     my $app = $t->app;
+
+    my $true_value = $app->config->{'database'}->{'type'} eq 'mysql' ? 1 : "'t'";
+    my $false_value = $app->config->{'database'}->{'type'} eq 'mysql' ? 0 : "'f'";
+
     # Empty all tables
     for my $schema ($app->schema('')->schemas) {
         my $m = $app->schema($schema);
         $m->can('delete_everything') and $m->delete_everything;
     }
     # Insert some defaults
-    $app->schema('admin')->raw_query(q[
+
+    my $query = q[
         INSERT INTO %table_admin
         VALUES ('test@test.invalid','$1$J4kbnhXK$id1Eb49PlvF2hdsAAyP5G0',
-        '2012-05-28 17:59:16','2012-05-28 17:59:16',1)
-        ]
-    );
-    $app->schema('domain')->raw_query(q[
+        '2012-05-28 17:59:16','2012-05-28 17:59:16',TRUEVALUE)
+    ];
+
+    $query =~ s/TRUEVALUE/$true_value/g;
+
+    $app->schema('admin')->raw_query($query);
+
+    $query = q[
         INSERT INTO %table_domain
-        VALUES ('ALL','',0,0,0,0,'',0,'0000-00-00 00:00:00','0000-00-00 00:00:00', 1),
-               ('test.com','No description',0,0,0,0,'',0,'0000-00-00 00:00:00','0000-00-00 00:00:00', 1)
-        ]
-    );
-    $app->schema('domainadmin')->raw_query(q[
+        VALUES ('ALL','',0,0,0,0,'',FALSEVALUE,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP, TRUEVALUE),
+               ('test.com','No description',0,0,0,0,'',FALSEVALUE,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP, TRUEVALUE)
+    ];
+
+    $query =~ s/TRUEVALUE/$true_value/g;
+    $query =~ s/FALSEVALUE/$false_value/g;
+
+    $app->schema('domain')->raw_query($query);
+
+    $query = q[
         INSERT INTO %table_domain_admins
-        VALUES ('test@test.invalid','ALL','2012-05-28 17:59:16',1)
-        ]
-    );
+        VALUES ('test@test.invalid','ALL','2012-05-28 17:59:16',TRUEVALUE)
+    ];
+
+    $query =~ s/TRUEVALUE/$true_value/g;
+
+    $app->schema('domainadmin')->raw_query($query);
 }
