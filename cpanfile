@@ -8,3 +8,6 @@ requires 'FreezeThaw';
 requires 'Mojolicious::Plugin::I18N';
 requires 'DBD::mysql';
 requires 'DBD::Pg';
+requires 'Email::Valid';
+requires 'HTML::Entities';
+requires 'Net::Domain::TLD';
