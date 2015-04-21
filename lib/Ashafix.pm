@@ -17,7 +17,6 @@
 package Ashafix;
 use Mojo::Base 'Mojolicious';
 use Carp;
-use MojoX::Renderer::TT;
 use Mojolicious::Plugin::Config;
 use Ashafix::Model;
 use Ashafix::Controller;
